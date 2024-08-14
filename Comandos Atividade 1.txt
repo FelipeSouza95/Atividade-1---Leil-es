@@ -1,0 +1,17 @@
+Para atividade foi baixado o material complementar. Projeto e Script.
+
+Comandos usados.
+
+git init - iniciar o versionamento em uma pasta.
+
+git status - verificar status.
+
+git add . - informar quais arquivos serão adicionados ao registro de versionamento.
+
+git commit -m "Nome da ação" - fazer registro do versionamento.
+
+git remote add origin https://github.com/FelipeSouza95/Atividade-1---Leil-es.git - link com git remote.
+
+git push - Subir registro remoto para GitHub.
+
+git pull - Enviar ou atualizar arquivo local da pasta.
