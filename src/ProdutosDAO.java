@@ -109,4 +109,45 @@ public class ProdutosDAO {
             e.printStackTrace();
         }
     }
+    // Método para pesquisar produtos vendidos por ID ou nome
+    public ArrayList<ProdutosDTO> pesquisarProdutosVendidos(String pesquisa) throws Exception {
+        ArrayList<ProdutosDTO> lista = new ArrayList<>();
+        String sql = "SELECT * FROM produtos WHERE status = 'Vendido' AND (id = ? OR nome LIKE ?)";
+        
+        try (Connection conn = new conectaDAO().connectDB();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            
+            // Verifica se a pesquisa é um número (ID) ou uma string (nome)
+            if (isNumeric(pesquisa)) {
+                pst.setInt(1, Integer.parseInt(pesquisa));
+                pst.setString(2, "%");
+            } else {
+                pst.setInt(1, 0); // ID não usado se a pesquisa for por nome
+                pst.setString(2, "%" + pesquisa + "%");
+            }
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    ProdutosDTO produto = new ProdutosDTO();
+                    produto.setId(rs.getInt("id"));
+                    produto.setNome(rs.getString("nome"));
+                    produto.setValor(rs.getInt("valor"));
+                    produto.setStatus(rs.getString("status"));
+                    lista.add(produto);
+                }
+            }
+        }
+        
+        return lista;
+    }
+
+    // Método auxiliar para verificar se uma string é um número
+    private boolean isNumeric(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }
