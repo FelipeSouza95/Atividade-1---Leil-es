@@ -69,13 +69,21 @@ public class ProdutosDAO {
 
         return lista;
     }
-
     public ArrayList<ProdutosDTO> listarProdutosVendidos() throws SQLException {
         ArrayList<ProdutosDTO> lista = new ArrayList<>();
         String sql = "SELECT * FROM produtos WHERE status = 'Vendido'";
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(sql);
 
+<<<<<<< Updated upstream
+    public ArrayList<ProdutosDTO> listarProdutosVendidos() throws SQLException {
+        ArrayList<ProdutosDTO> lista = new ArrayList<>();
+        String sql = "SELECT * FROM produtos WHERE status = 'Vendido'";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+
+=======
+>>>>>>> Stashed changes
         while (rs.next()) {
             ProdutosDTO produto = new ProdutosDTO();
             produto.setId(rs.getInt("id"));
