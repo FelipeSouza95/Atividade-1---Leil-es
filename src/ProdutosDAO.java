@@ -1,3 +1,4 @@
+
 import java.sql.*;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
@@ -19,6 +20,33 @@ public class ProdutosDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public boolean venderProduto(int id) {
+        Connection conn = null;
+        PreparedStatement p = null;
+        try {
+            conn = new conectaDAO().connectDB();
+            String sql = "UPDATE PRODUTOS SET status = 'Vendido' WHERE id = ?";
+            p = conn.prepareStatement(sql);
+            p.setInt(1, id);
+            int rowsAffected = p.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (p != null) {
+                    p.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
