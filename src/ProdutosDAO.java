@@ -5,6 +5,7 @@ import javax.swing.JOptionPane;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ProdutosDAO {
 
@@ -69,87 +70,45 @@ public class ProdutosDAO {
         return lista;
     }
 
-    // Método para listar todos os produtos vendidos
-    public ArrayList<ProdutosDTO> listarProdutosVendidos() {
+    public ArrayList<ProdutosDTO> listarProdutosVendidos() throws SQLException {
         ArrayList<ProdutosDTO> lista = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
+        String sql = "SELECT * FROM produtos WHERE status = 'Vendido'";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
 
-        try {
-            conn = new conectaDAO().connectDB();
-            String sql = "SELECT * FROM produtos WHERE status = 'Vendido'";
-            pst = conn.prepareStatement(sql);
-            rs = pst.executeQuery();
-
-            while (rs.next()) {
-                ProdutosDTO produto = new ProdutosDTO();
-                produto.setId(rs.getInt("id"));
-                produto.setNome(rs.getString("nome"));
-                produto.setValor(rs.getInt("valor"));
-                produto.setStatus(rs.getString("status"));
-                lista.add(produto);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace(); // Para debug
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (pst != null) {
-                    pst.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace(); // Para debug
-            }
+        while (rs.next()) {
+            ProdutosDTO produto = new ProdutosDTO();
+            produto.setId(rs.getInt("id"));
+            produto.setNome(rs.getString("nome"));
+            produto.setValor(rs.getInt("valor"));
+            produto.setStatus(rs.getString("status"));
+            lista.add(produto);
         }
+
+        rs.close();
+        stmt.close();
         return lista;
     }
 
-    // Método para pesquisar produtos vendidos por ID ou nome
-    public ArrayList<ProdutosDTO> pesquisarProdutosVendidos(String consulta) {
+    public ArrayList<ProdutosDTO> pesquisarProdutosVendidos(String consulta) throws SQLException {
         ArrayList<ProdutosDTO> lista = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
+        String sql = "SELECT * FROM produtos WHERE status = 'Vendido' AND (nome LIKE ? OR id = ?)";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, "%" + consulta + "%");
+        pstmt.setInt(2, Integer.parseInt(consulta));
+        ResultSet rs = pstmt.executeQuery();
 
-        try {
-            conn = new conectaDAO().connectDB();
-            String sql = "SELECT * FROM produtos WHERE status = 'Vendido' AND (id = ? OR nome LIKE ?)";
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, consulta);
-            pst.setString(2, "%" + consulta + "%");
-            rs = pst.executeQuery();
-
-            while (rs.next()) {
-                ProdutosDTO produto = new ProdutosDTO();
-                produto.setId(rs.getInt("id"));
-                produto.setNome(rs.getString("nome"));
-                produto.setValor(rs.getInt("valor"));
-                produto.setStatus(rs.getString("status"));
-                lista.add(produto);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (pst != null) {
-                    pst.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        while (rs.next()) {
+            ProdutosDTO produto = new ProdutosDTO();
+            produto.setId(rs.getInt("id"));
+            produto.setNome(rs.getString("nome"));
+            produto.setValor(rs.getInt("valor"));
+            produto.setStatus(rs.getString("status"));
+            lista.add(produto);
         }
+
+        rs.close();
+        pstmt.close();
         return lista;
     }
 }
