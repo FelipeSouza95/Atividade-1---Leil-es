@@ -72,82 +72,84 @@ public class ProdutosDAO {
     // Método para listar todos os produtos vendidos
     public ArrayList<ProdutosDTO> listarProdutosVendidos() {
         ArrayList<ProdutosDTO> lista = new ArrayList<>();
-        conn = new conectaDAO().connectDB();
-        String sql = "SELECT * FROM PRODUTOS WHERE status = 'Vendido'";
+        Connection conn = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+
         try {
-            PreparedStatement p = conn.prepareStatement(sql);
-            resultset = p.executeQuery();
-            while (resultset.next()) {
+            conn = new conectaDAO().connectDB();
+            String sql = "SELECT * FROM produtos WHERE status = 'Vendido'";
+            pst = conn.prepareStatement(sql);
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
                 ProdutosDTO produto = new ProdutosDTO();
-                produto.setId(resultset.getInt("id"));
-                produto.setNome(resultset.getString("nome"));
-                produto.setValor(resultset.getInt("valor"));
-                produto.setStatus(resultset.getString("status"));
+                produto.setId(rs.getInt("id"));
+                produto.setNome(rs.getString("nome"));
+                produto.setValor(rs.getInt("valor"));
+                produto.setStatus(rs.getString("status"));
                 lista.add(produto);
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao listar produtos vendidos: " + e.getMessage());
+            e.printStackTrace(); // Para debug
         } finally {
-            closeResources(resultset, null, conn);
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Para debug
+            }
         }
         return lista;
     }
 
-    // Método para fechar recursos de forma segura
-    private void closeResources(ResultSet rs, PreparedStatement ps, Connection conn) {
+    // Método para pesquisar produtos vendidos por ID ou nome
+    public ArrayList<ProdutosDTO> pesquisarProdutosVendidos(String consulta) {
+        ArrayList<ProdutosDTO> lista = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+
         try {
-            if (rs != null) {
-                rs.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
-            if (conn != null) {
-                conn.close();
+            conn = new conectaDAO().connectDB();
+            String sql = "SELECT * FROM produtos WHERE status = 'Vendido' AND (id = ? OR nome LIKE ?)";
+            pst = conn.prepareStatement(sql);
+            pst.setString(1, consulta);
+            pst.setString(2, "%" + consulta + "%");
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+                ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(rs.getInt("id"));
+                produto.setNome(rs.getString("nome"));
+                produto.setValor(rs.getInt("valor"));
+                produto.setStatus(rs.getString("status"));
+                lista.add(produto);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-    }
-    // Método para pesquisar produtos vendidos por ID ou nome
-    public ArrayList<ProdutosDTO> pesquisarProdutosVendidos(String pesquisa) throws Exception {
-        ArrayList<ProdutosDTO> lista = new ArrayList<>();
-        String sql = "SELECT * FROM produtos WHERE status = 'Vendido' AND (id = ? OR nome LIKE ?)";
-        
-        try (Connection conn = new conectaDAO().connectDB();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            
-            // Verifica se a pesquisa é um número (ID) ou uma string (nome)
-            if (isNumeric(pesquisa)) {
-                pst.setInt(1, Integer.parseInt(pesquisa));
-                pst.setString(2, "%");
-            } else {
-                pst.setInt(1, 0); // ID não usado se a pesquisa for por nome
-                pst.setString(2, "%" + pesquisa + "%");
-            }
-
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    ProdutosDTO produto = new ProdutosDTO();
-                    produto.setId(rs.getInt("id"));
-                    produto.setNome(rs.getString("nome"));
-                    produto.setValor(rs.getInt("valor"));
-                    produto.setStatus(rs.getString("status"));
-                    lista.add(produto);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
                 }
+                if (pst != null) {
+                    pst.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
-        
         return lista;
-    }
-
-    // Método auxiliar para verificar se uma string é um número
-    private boolean isNumeric(String str) {
-        try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
     }
 }
