@@ -69,4 +69,44 @@ public class ProdutosDAO {
         return lista;
     }
 
+    // Método para listar todos os produtos vendidos
+    public ArrayList<ProdutosDTO> listarProdutosVendidos() {
+        ArrayList<ProdutosDTO> lista = new ArrayList<>();
+        conn = new conectaDAO().connectDB();
+        String sql = "SELECT * FROM PRODUTOS WHERE status = 'Vendido'";
+        try {
+            PreparedStatement p = conn.prepareStatement(sql);
+            resultset = p.executeQuery();
+            while (resultset.next()) {
+                ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(resultset.getInt("id"));
+                produto.setNome(resultset.getString("nome"));
+                produto.setValor(resultset.getInt("valor"));
+                produto.setStatus(resultset.getString("status"));
+                lista.add(produto);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao listar produtos vendidos: " + e.getMessage());
+        } finally {
+            closeResources(resultset, null, conn);
+        }
+        return lista;
+    }
+
+    // Método para fechar recursos de forma segura
+    private void closeResources(ResultSet rs, PreparedStatement ps, Connection conn) {
+        try {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
